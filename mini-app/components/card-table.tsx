@@ -14,6 +14,7 @@ const MAX_X = 3;
 type Cell = {
   fruit: string;
   faceUp: boolean;
+  matched: boolean;
 };
 
 export function CardTable() {
@@ -23,6 +24,7 @@ export function CardTable() {
   const [message, setMessage] = useState("");
   const [firstFlip, setFirstFlip] = useState<{ i: number; j: number; fruit: string } | null>(null);
   const [xCount, setXCount] = useState(0);
+  const [isLocked, setIsLocked] = useState(false);
 
   // Initialize grid with random fruits, all face down
   useEffect(() => {
@@ -34,6 +36,7 @@ export function CardTable() {
       Array.from({ length: GRID_SIZE }, () => ({
         fruit: FRUITS[Math.floor(Math.random() * FRUITS.length)],
         faceUp: false,
+        matched: false,
       }))
     );
     setGrid(init);
@@ -58,6 +61,7 @@ export function CardTable() {
   const shuffle = () => {
     resetGame();
     setShuffling(true);
+    setIsLocked(false);
     setMessage("");
     setSeconds(TIMER_DURATION);
 
@@ -94,38 +98,66 @@ export function CardTable() {
   };
 
   const flipCard = (i: number, j: number) => {
-    setGrid((prev) => {
-      const newGrid = prev.map((row, rIdx) =>
-        row.map((cell, cIdx) => {
-          if (rIdx === i && cIdx === j) {
-            return { ...cell, faceUp: !cell.faceUp };
-          }
-          return cell;
-        })
-      );
-      return newGrid;
-    });
-
+    if (isLocked) return;
     const cell = grid[i][j];
-    if (!cell.faceUp) return; // ignore if still face down after flip
+    if (cell.matched || cell.faceUp) return;
+
+    // flip this card
+    setGrid((prev) =>
+      prev.map((row, rIdx) =>
+        row.map((c, cIdx) => {
+          if (rIdx === i && cIdx === j) {
+            return { ...c, faceUp: true };
+          }
+          return c;
+        })
+      )
+    );
 
     if (!firstFlip) {
       setFirstFlip({ i, j, fruit: cell.fruit });
     } else {
+      setIsLocked(true);
       if (cell.fruit === firstFlip.fruit) {
-        // matched, keep both face up
+        // matched
+        setGrid((prev) =>
+          prev.map((row, rIdx) =>
+            row.map((c, cIdx) => {
+              if (
+                (rIdx === i && cIdx === j) ||
+                (rIdx === firstFlip.i && cIdx === firstFlip.j)
+              ) {
+                return { ...c, matched: true };
+              }
+              return c;
+            })
+          )
+        );
         setFirstFlip(null);
+        setIsLocked(false);
+        // check win
+        setTimeout(() => {
+          const allMatched = grid.flat().every((c) => c.matched);
+          if (allMatched) {
+            setMessage("You win!");
+            setTimeout(() => {
+              shuffle();
+            }, 1000);
+          }
+        }, 0);
       } else {
         // mismatch
         const newCount = xCount + 1;
         setXCount(newCount);
         setMessage(`X ${newCount}/${MAX_X}`);
-        // flip back after short delay
         setTimeout(() => {
           setGrid((prev) =>
             prev.map((row, rIdx) =>
               row.map((c, cIdx) => {
-                if ((rIdx === i && cIdx === j) || (rIdx === firstFlip.i && cIdx === firstFlip.j)) {
+                if (
+                  (rIdx === i && cIdx === j) ||
+                  (rIdx === firstFlip.i && cIdx === firstFlip.j)
+                ) {
                   return { ...c, faceUp: false };
                 }
                 return c;
@@ -133,6 +165,7 @@ export function CardTable() {
             )
           );
           setFirstFlip(null);
+          setIsLocked(false);
         }, 800);
       }
     }
@@ -142,6 +175,7 @@ export function CardTable() {
     if (xCount >= MAX_X) {
       setMessage("Game over! Too many mismatches.");
       setShuffling(false);
+      setIsLocked(false);
     }
   }, [xCount]);
 
@@ -154,6 +188,7 @@ export function CardTable() {
               key={`${i}-${j}`}
               fruit={cell.fruit}
               faceUp={cell.faceUp}
+              disabled={cell.matched}
               onClick={() => flipCard(i, j)}
             />
           ))
