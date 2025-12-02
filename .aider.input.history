@@ -66,3 +66,13 @@
 +Game ends when timer hits 0, final score = highest score reached.
 +
 +Add one more row of cards with the same number of collum.
+
+# 2025-12-02 16:17:00.636456
++Add a restart button that will reset the progress of the game.
++
++If the threshold of the mistake is reach the game must be force stop and display a screen game over the game will only continue if the player press the restart button.
+
+# 2025-12-02 16:17:00.637097
++Add a restart button that will reset the progress of the game.
++
++If the threshold of the mistake is reach the game must be force stop and display a screen game over the game will only continue if the player press the restart button.
