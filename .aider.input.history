@@ -76,3 +76,15 @@
 +Add a restart button that will reset the progress of the game.
 +
 +If the threshold of the mistake is reach the game must be force stop and display a screen game over the game will only continue if the player press the restart button.
+
+# 2025-12-02 16:55:43.138023
++Can we make the mistakes upper limit to 5.
+
+# 2025-12-02 16:55:43.141490
++Can we make the mistakes upper limit to 5.
+
+# 2025-12-02 16:56:52.543589
++apply changes
+
+# 2025-12-02 16:56:52.544218
++apply changes
