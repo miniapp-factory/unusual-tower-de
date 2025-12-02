@@ -117,8 +117,9 @@ export function CardTable() {
         setFirstFlip(null);
       } else {
         // mismatch
-        setXCount((c) => c + 1);
-        setMessage(`X ${c + 1}/${MAX_X}`);
+        const newCount = xCount + 1;
+        setXCount(newCount);
+        setMessage(`X ${newCount}/${MAX_X}`);
         // flip back after short delay
         setTimeout(() => {
           setGrid((prev) =>
