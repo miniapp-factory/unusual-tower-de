@@ -47,6 +47,8 @@ export function CardTable() {
     setXCount(0);
     setMessage("");
     setSeconds(0);
+    setScore(0);
+    setStreak(0);
   };
 
   // Timer and shuffle interval refs
@@ -67,6 +69,8 @@ export function CardTable() {
     setIsLocked(false);
     setMessage("");
     setSeconds(TIMER_DURATION);
+    setScore(0);
+    setStreak(0);
 
     // Start countdown timer
     timerRef.current = setInterval(() => {
@@ -124,6 +128,8 @@ export function CardTable() {
       setIsLocked(true);
       if (cell.fruit === firstFlip.fruit) {
         // matched
+        const newScore = score + 10 * (streak + 1);
+        const newStreak = streak + 1;
         setGrid((prev) =>
           prev.map((row, rIdx) =>
             row.map((c, cIdx) => {
@@ -137,13 +143,19 @@ export function CardTable() {
             })
           )
         );
+        setScore(newScore);
+        setStreak(newStreak);
         setFirstFlip(null);
         setIsLocked(false);
         // check win
         setTimeout(() => {
           const allMatched = grid.flat().every((c) => c.matched);
           if (allMatched) {
-            setMessage("You win!");
+            // Update highest score if needed
+            if (newScore > highestScore) {
+              setHighestScore(newScore);
+            }
+            setMessage(`You win! Score: ${newScore}`);
             setTimeout(() => {
               shuffle();
             }, 1000);
@@ -154,6 +166,7 @@ export function CardTable() {
         const newCount = xCount + 1;
         setXCount(newCount);
         setMessage(`X ${newCount}/${MAX_X}`);
+        setStreak(0);
         setTimeout(() => {
           setGrid((prev) =>
             prev.map((row, rIdx) =>
