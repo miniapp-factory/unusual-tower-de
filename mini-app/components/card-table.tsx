@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { FruitCard } from "./fruit-card";
 
 const FRUITS = ["apple", "banana", "cherry", "lemon"];
-const GRID_SIZE = 3;
+const GRID_SIZE = 4;
 const SHUFFLE_DURATION = 2000; // ms
 const SHUFFLE_INTERVAL = 200; // ms
 const TIMER_DURATION = 30; // seconds
@@ -25,6 +25,9 @@ export function CardTable() {
   const [firstFlip, setFirstFlip] = useState<{ i: number; j: number; fruit: string } | null>(null);
   const [xCount, setXCount] = useState(0);
   const [isLocked, setIsLocked] = useState(false);
+  const [score, setScore] = useState(0);
+  const [streak, setStreak] = useState(0);
+  const [highestScore, setHighestScore] = useState(0);
 
   // Initialize grid with random fruits, all face down
   useEffect(() => {
@@ -182,7 +185,7 @@ export function CardTable() {
 
   return (
     <div className="flex flex-col items-center gap-4">
-      <div className="grid grid-cols-3 gap-2">
+      <div className="grid grid-cols-4 gap-2">
         {grid.flatMap((row, i) =>
           row.map((cell, j) => (
             <FruitCard
