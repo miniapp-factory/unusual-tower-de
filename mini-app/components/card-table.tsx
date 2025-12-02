@@ -28,6 +28,10 @@ export function CardTable() {
   const [score, setScore] = useState(0);
   const [streak, setStreak] = useState(0);
   const [highestScore, setHighestScore] = useState(0);
+  const isGameOver =
+    !shuffling &&
+    seconds === 0 &&
+    (xCount >= MAX_X || message.includes("Game over"));
 
   // Initialize grid with random fruits, all face down
   useEffect(() => {
@@ -49,6 +53,7 @@ export function CardTable() {
     setSeconds(0);
     setScore(0);
     setStreak(0);
+    setShuffling(false);
   };
 
   // Timer and shuffle interval refs
@@ -217,6 +222,9 @@ export function CardTable() {
       </div>
       <Button onClick={shuffle} disabled={shuffling || seconds === 0}>
         Start
+      </Button>
+      <Button onClick={resetGame} disabled={!isGameOver}>
+        Restart
       </Button>
       {seconds > 0 && <p className="mt-2">Time left: {seconds}s</p>}
       {message && <p className="mt-2">{message}</p>}
