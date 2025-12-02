@@ -77,7 +77,11 @@ export function CardTable() {
       setSeconds((prev) => {
         if (prev <= 1) {
           clearInterval(timerRef.current!);
-          setMessage("Game over!");
+          // Update highest score if needed
+          if (score > highestScore) {
+            setHighestScore(score);
+          }
+          setMessage(`Game over! Final score: ${score}`);
           setShuffling(false);
           return 0;
         }
