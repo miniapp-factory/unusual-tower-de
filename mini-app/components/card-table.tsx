@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { FruitCard } from "./fruit-card";
 
@@ -8,64 +8,120 @@ const FRUITS = ["apple", "banana", "cherry", "lemon"];
 const GRID_SIZE = 3;
 const SHUFFLE_DURATION = 2000; // ms
 const SHUFFLE_INTERVAL = 200; // ms
-const MAX_ATTEMPTS = 2;
+const TIMER_DURATION = 30; // seconds
+
+type Cell = {
+  fruit: string;
+  faceUp: boolean;
+};
 
 export function CardTable() {
-  const [grid, setGrid] = useState<string[][]>([]);
+  const [grid, setGrid] = useState<Cell[][]>([]);
   const [shuffling, setShuffling] = useState(false);
-  const [attempts, setAttempts] = useState(MAX_ATTEMPTS);
+  const [seconds, setSeconds] = useState(0);
   const [message, setMessage] = useState("");
 
-  // Initialize grid with random fruits
+  // Initialize grid with random fruits, all face down
   useEffect(() => {
     const init = Array.from({ length: GRID_SIZE }, () =>
-      Array.from({ length: GRID_SIZE }, () => FRUITS[Math.floor(Math.random() * FRUITS.length)])
+      Array.from({ length: GRID_SIZE }, () => ({
+        fruit: FRUITS[Math.floor(Math.random() * FRUITS.length)],
+        faceUp: false,
+      }))
     );
     setGrid(init);
+  }, []);
+
+  // Timer and shuffle interval refs
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const shuffleRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+      if (shuffleRef.current) clearInterval(shuffleRef.current);
+    };
   }, []);
 
   const shuffle = () => {
     setShuffling(true);
     setMessage("");
-    const interval = setInterval(() => {
-      setGrid(prev =>
-        prev.map(row =>
-          row.map(() => FRUITS[Math.floor(Math.random() * FRUITS.length)])
+    setSeconds(TIMER_DURATION);
+
+    // Start countdown timer
+    timerRef.current = setInterval(() => {
+      setSeconds((prev) => {
+        if (prev <= 1) {
+          clearInterval(timerRef.current!);
+          setMessage("Game over!");
+          setShuffling(false);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    // Shuffle grid periodically
+    shuffleRef.current = setInterval(() => {
+      setGrid((prev) =>
+        prev.map((row) =>
+          row.map(() => ({
+            fruit: FRUITS[Math.floor(Math.random() * FRUITS.length)],
+            faceUp: false,
+          }))
         )
       );
     }, SHUFFLE_INTERVAL);
 
+    // Stop shuffling after duration
     setTimeout(() => {
-      clearInterval(interval);
+      clearInterval(shuffleRef.current!);
       setShuffling(false);
       checkWin();
     }, SHUFFLE_DURATION);
   };
 
+  const flipCard = (i: number, j: number) => {
+    setGrid((prev) => {
+      const newGrid = prev.map((row, rIdx) =>
+        row.map((cell, cIdx) => {
+          if (rIdx === i && cIdx === j) {
+            return { ...cell, faceUp: !cell.faceUp };
+          }
+          return cell;
+        })
+      );
+      return newGrid;
+    });
+    // After flipping, check win
+    setTimeout(() => {
+      checkWin();
+    }, 0);
+  };
+
   const checkWin = () => {
+    // Ensure all cards are face up
+    const allFaceUp = grid.every((row) => row.every((cell) => cell.faceUp));
+    if (!allFaceUp) return;
+
     // Check rows
     for (let i = 0; i < GRID_SIZE; i++) {
       const row = grid[i];
-      if (row.every(f => f === row[0])) {
+      if (row.every((cell) => cell.fruit === row[0].fruit)) {
         setMessage("You win!");
+        if (timerRef.current) clearInterval(timerRef.current);
         return;
       }
     }
     // Check columns
     for (let j = 0; j < GRID_SIZE; j++) {
-      const col = grid.map(row => row[j]);
-      if (col.every(f => f === col[0])) {
+      const col = grid.map((row) => row[j]);
+      if (col.every((cell) => cell.fruit === col[0].fruit)) {
         setMessage("You win!");
+        if (timerRef.current) clearInterval(timerRef.current);
         return;
       }
-    }
-    // No win
-    const remaining = attempts - 1;
-    setAttempts(remaining);
-    if (remaining <= 0) {
-      setMessage("Game over!");
-    } else {
-      setMessage(`No match. Attempts left: ${remaining}`);
     }
   };
 
@@ -73,19 +129,20 @@ export function CardTable() {
     <div className="flex flex-col items-center gap-4">
       <div className="grid grid-cols-3 gap-2">
         {grid.flatMap((row, i) =>
-          row.map((fruit, j) => (
+          row.map((cell, j) => (
             <FruitCard
               key={`${i}-${j}`}
-              fruit={fruit}
-              faceUp={true}
-              onClick={() => {}}
+              fruit={cell.fruit}
+              faceUp={cell.faceUp}
+              onClick={() => flipCard(i, j)}
             />
           ))
         )}
       </div>
-      <Button onClick={shuffle} disabled={shuffling || attempts <= 0}>
+      <Button onClick={shuffle} disabled={shuffling || seconds === 0}>
         Start
       </Button>
+      {seconds > 0 && <p className="mt-2">Time left: {seconds}s</p>}
       {message && <p className="mt-2">{message}</p>}
     </div>
   );
