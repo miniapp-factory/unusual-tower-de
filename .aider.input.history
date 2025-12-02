@@ -30,3 +30,17 @@
 
 # 2025-12-02 07:38:58.467955
 +The flip card most be horizontal , once the user flip a card  the second must be identical to the first flip if not the user will get a X, once the user got three X's it's game over, the start buttons main purpose is to shuffle ad restart the game.
+
+# 2025-12-02 14:29:45.709022
++The  card is Hidden when Flip then the state is Lock  Compare to the other flip card If mismatch  show briefly then flip back and unlock.
++
++If match then stay revealed and disable interaction.
++
++When all cards matched reset board and start new round.
+
+# 2025-12-02 14:29:45.709349
++The  card is Hidden when Flip then the state is Lock  Compare to the other flip card If mismatch  show briefly then flip back and unlock.
++
++If match then stay revealed and disable interaction.
++
++When all cards matched reset board and start new round.
