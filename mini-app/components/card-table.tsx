@@ -9,7 +9,7 @@ const GRID_SIZE = 4;
 const SHUFFLE_DURATION = 2000; // ms
 const SHUFFLE_INTERVAL = 200; // ms
 const TIMER_DURATION = 30; // seconds
-const MAX_X = 3;
+const MAX_X = 5;
 
 type Cell = {
   fruit: string;
