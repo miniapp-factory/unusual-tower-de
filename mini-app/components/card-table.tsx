@@ -85,6 +85,7 @@ export function CardTable() {
           row.map(() => ({
             fruit: FRUITS[Math.floor(Math.random() * FRUITS.length)],
             faceUp: false,
+            matched: false,
           }))
         )
       );

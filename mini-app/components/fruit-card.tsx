@@ -1,8 +1,6 @@
 "use client";
 
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { useState } from "react";
 
 export interface FruitCardProps {
   fruit: string;
