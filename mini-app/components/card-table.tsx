@@ -9,6 +9,7 @@ const GRID_SIZE = 3;
 const SHUFFLE_DURATION = 2000; // ms
 const SHUFFLE_INTERVAL = 200; // ms
 const TIMER_DURATION = 30; // seconds
+const MAX_X = 3;
 
 type Cell = {
   fruit: string;
@@ -20,9 +21,15 @@ export function CardTable() {
   const [shuffling, setShuffling] = useState(false);
   const [seconds, setSeconds] = useState(0);
   const [message, setMessage] = useState("");
+  const [firstFlip, setFirstFlip] = useState<{ i: number; j: number; fruit: string } | null>(null);
+  const [xCount, setXCount] = useState(0);
 
   // Initialize grid with random fruits, all face down
   useEffect(() => {
+    resetGame();
+  }, []);
+
+  const resetGame = () => {
     const init = Array.from({ length: GRID_SIZE }, () =>
       Array.from({ length: GRID_SIZE }, () => ({
         fruit: FRUITS[Math.floor(Math.random() * FRUITS.length)],
@@ -30,7 +37,11 @@ export function CardTable() {
       }))
     );
     setGrid(init);
-  }, []);
+    setFirstFlip(null);
+    setXCount(0);
+    setMessage("");
+    setSeconds(0);
+  };
 
   // Timer and shuffle interval refs
   const timerRef = useRef<NodeJS.Timeout | null>(null);
@@ -45,6 +56,7 @@ export function CardTable() {
   }, []);
 
   const shuffle = () => {
+    resetGame();
     setShuffling(true);
     setMessage("");
     setSeconds(TIMER_DURATION);
@@ -78,7 +90,6 @@ export function CardTable() {
     setTimeout(() => {
       clearInterval(shuffleRef.current!);
       setShuffling(false);
-      checkWin();
     }, SHUFFLE_DURATION);
   };
 
@@ -94,36 +105,44 @@ export function CardTable() {
       );
       return newGrid;
     });
-    // After flipping, check win
-    setTimeout(() => {
-      checkWin();
-    }, 0);
-  };
 
-  const checkWin = () => {
-    // Ensure all cards are face up
-    const allFaceUp = grid.every((row) => row.every((cell) => cell.faceUp));
-    if (!allFaceUp) return;
+    const cell = grid[i][j];
+    if (!cell.faceUp) return; // ignore if still face down after flip
 
-    // Check rows
-    for (let i = 0; i < GRID_SIZE; i++) {
-      const row = grid[i];
-      if (row.every((cell) => cell.fruit === row[0].fruit)) {
-        setMessage("You win!");
-        if (timerRef.current) clearInterval(timerRef.current);
-        return;
+    if (!firstFlip) {
+      setFirstFlip({ i, j, fruit: cell.fruit });
+    } else {
+      if (cell.fruit === firstFlip.fruit) {
+        // matched, keep both face up
+        setFirstFlip(null);
+      } else {
+        // mismatch
+        setXCount((c) => c + 1);
+        setMessage(`X ${c + 1}/${MAX_X}`);
+        // flip back after short delay
+        setTimeout(() => {
+          setGrid((prev) =>
+            prev.map((row, rIdx) =>
+              row.map((c, cIdx) => {
+                if ((rIdx === i && cIdx === j) || (rIdx === firstFlip.i && cIdx === firstFlip.j)) {
+                  return { ...c, faceUp: false };
+                }
+                return c;
+              })
+            )
+          );
+          setFirstFlip(null);
+        }, 800);
       }
     }
-    // Check columns
-    for (let j = 0; j < GRID_SIZE; j++) {
-      const col = grid.map((row) => row[j]);
-      if (col.every((cell) => cell.fruit === col[0].fruit)) {
-        setMessage("You win!");
-        if (timerRef.current) clearInterval(timerRef.current);
-        return;
-      }
-    }
   };
+
+  useEffect(() => {
+    if (xCount >= MAX_X) {
+      setMessage("Game over! Too many mismatches.");
+      setShuffling(false);
+    }
+  }, [xCount]);
 
   return (
     <div className="flex flex-col items-center gap-4">
