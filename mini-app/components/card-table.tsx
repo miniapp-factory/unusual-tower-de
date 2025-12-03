@@ -70,48 +70,27 @@ export function CardTable() {
 
   const shuffle = () => {
     resetGame();
+    // Reveal all cards for 1 second at the start of the game
+    setGrid((prev) =>
+      prev.map((row) =>
+        row.map((c) => ({ ...c, faceUp: true }))
+      )
+    );
     setShuffling(true);
-    setIsLocked(false);
+    setIsLocked(true);
     setMessage("");
     setSeconds(TIMER_DURATION);
     setScore(0);
     setStreak(0);
-
-    // Start countdown timer
-    timerRef.current = setInterval(() => {
-      setSeconds((prev) => {
-        if (prev <= 1) {
-          clearInterval(timerRef.current!);
-          // Update highest score if needed
-          if (score > highestScore) {
-            setHighestScore(score);
-          }
-          setMessage(`Game over! Final score: ${score}`);
-          setShuffling(false);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    // Shuffle grid periodically
-    shuffleRef.current = setInterval(() => {
+    // Hide cards after 1 second
+    setTimeout(() => {
       setGrid((prev) =>
         prev.map((row) =>
-          row.map(() => ({
-            fruit: FRUITS[Math.floor(Math.random() * FRUITS.length)],
-            faceUp: false,
-            matched: false,
-          }))
+          row.map((c) => ({ ...c, faceUp: false }))
         )
       );
-    }, SHUFFLE_INTERVAL);
-
-    // Stop shuffling after duration
-    setTimeout(() => {
-      clearInterval(shuffleRef.current!);
-      setShuffling(false);
-    }, SHUFFLE_DURATION);
+      setIsLocked(false);
+    }, 1000);
   };
 
   const flipCard = (i: number, j: number) => {
@@ -201,7 +180,9 @@ export function CardTable() {
     if (xCount >= MAX_X) {
       setMessage("Game over! Too many mismatches.");
       setShuffling(false);
-      setIsLocked(false);
+      setIsLocked(true);
+      setSeconds(0);
+      if (timerRef.current) clearInterval(timerRef.current);
     }
   }, [xCount]);
 
