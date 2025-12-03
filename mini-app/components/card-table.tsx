@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { FruitCard } from "./fruit-card";
 
-const FRUITS = ["apple", "banana", "cherry", "lemon", "watermelon", "coconut", "mango"];
+const FRUITS = ["apple", "banana", "cherry", "lemon", "watermelon", "coconut", "mango", "strawberry"];
 const GRID_SIZE = 4;
 const SHUFFLE_DURATION = 2000; // ms
 const SHUFFLE_INTERVAL = 200; // ms
@@ -70,10 +70,8 @@ export function CardTable() {
 
   const shuffle = () => {
     resetGame();
-    // Create pairs: duplicate each fruit once, and duplicate apple twice more to make 8 pairs
+    // Create pairs: duplicate each fruit once
     const fruitPairs = FRUITS.flatMap((fruit) => [fruit, fruit]);
-    // Duplicate apple twice more
-    fruitPairs.push("apple", "apple");
     // Shuffle the array
     const shuffled = [...fruitPairs].sort(() => Math.random() - 0.5);
     // Assign to grid
