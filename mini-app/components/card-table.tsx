@@ -8,7 +8,7 @@ const FRUITS = ["apple", "banana", "cherry", "lemon", "watermelon", "coconut", "
 const GRID_SIZE = 4;
 const SHUFFLE_DURATION = 2000; // ms
 const SHUFFLE_INTERVAL = 200; // ms
-const TIMER_DURATION = 30; // seconds
+const TIMER_DURATION = 120; // seconds
 const MAX_X = 10;
 
 type Cell = {
