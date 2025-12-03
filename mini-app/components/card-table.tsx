@@ -70,12 +70,21 @@ export function CardTable() {
 
   const shuffle = () => {
     resetGame();
-    // Reveal all cards for 1 second at the start of the game
-    setGrid((prev) =>
-      prev.map((row) =>
-        row.map((c) => ({ ...c, faceUp: true }))
-      )
+    // Create pairs: duplicate each fruit once, and duplicate apple twice more to make 8 pairs
+    const fruitPairs = FRUITS.flatMap((fruit) => [fruit, fruit]);
+    // Duplicate apple twice more
+    fruitPairs.push("apple", "apple");
+    // Shuffle the array
+    const shuffled = [...fruitPairs].sort(() => Math.random() - 0.5);
+    // Assign to grid
+    const newGrid = Array.from({ length: GRID_SIZE }, (_, i) =>
+      Array.from({ length: GRID_SIZE }, (_, j) => ({
+        fruit: shuffled[i * GRID_SIZE + j],
+        faceUp: false,
+        matched: false,
+      }))
     );
+    setGrid(newGrid);
     setShuffling(true);
     setIsLocked(true);
     setMessage("");
