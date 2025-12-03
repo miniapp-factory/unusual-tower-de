@@ -155,9 +155,9 @@ export function CardTable() {
             if (newScore > highestScore) {
               setHighestScore(newScore);
             }
-            setMessage(`You win! Score: ${newScore}`);
+            setMessage(`Congratulations! You matched all cards.`);
             setTimeout(() => {
-              shuffle();
+              resetGame();
             }, 1000);
           }
         }, 0);
