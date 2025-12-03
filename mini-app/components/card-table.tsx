@@ -31,7 +31,7 @@ export function CardTable() {
   const isGameOver =
     !shuffling &&
     seconds === 0 &&
-    (xCount >= MAX_X || message.includes("Game over"));
+    (xCount >= MAX_X || message.includes("Game over") || message.includes("Congratulations"));
 
   // Initialize grid with random fruits, all face down
   useEffect(() => {
