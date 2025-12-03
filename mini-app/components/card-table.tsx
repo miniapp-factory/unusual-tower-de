@@ -39,14 +39,19 @@ export function CardTable() {
   }, []);
 
   const resetGame = () => {
-    const init = Array.from({ length: GRID_SIZE }, () =>
-      Array.from({ length: GRID_SIZE }, () => ({
-        fruit: FRUITS[Math.floor(Math.random() * FRUITS.length)],
+    // Create pairs: duplicate each fruit once
+    const fruitPairs = FRUITS.flatMap((fruit) => [fruit, fruit]);
+    // Shuffle the array
+    const shuffled = [...fruitPairs].sort(() => Math.random() - 0.5);
+    // Assign to grid
+    const newGrid = Array.from({ length: GRID_SIZE }, (_, i) =>
+      Array.from({ length: GRID_SIZE }, (_, j) => ({
+        fruit: shuffled[i * GRID_SIZE + j],
         faceUp: false,
         matched: false,
       }))
     );
-    setGrid(init);
+    setGrid(newGrid);
     setFirstFlip(null);
     setXCount(0);
     setMessage("");
