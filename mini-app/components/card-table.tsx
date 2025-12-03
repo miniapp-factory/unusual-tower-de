@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { FruitCard } from "./fruit-card";
 
-const FRUITS = ["apple", "banana", "cherry", "lemon"];
+const FRUITS = ["apple", "banana", "cherry", "lemon", "watermelon", "coconut", "mango"];
 const GRID_SIZE = 4;
 const SHUFFLE_DURATION = 2000; // ms
 const SHUFFLE_INTERVAL = 200; // ms
